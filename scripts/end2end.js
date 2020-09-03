@@ -39,4 +39,4 @@ const BigNumber = require("bignumber.js");
 
     let finalHmyBal = await hb.getBalance(hb.userAccount.address)
     console.log("after hrc20 balance: ", finalHmyBal.toString())
-}()).catch( (err) => console.log )
+}()).catch( (err) => console.log ).finally(() => process.exit())
