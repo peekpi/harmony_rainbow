@@ -6,6 +6,7 @@
 5. vice-versa
 
 > for example: eth-contract emit `event Locked(A, B, C)`, and will trigger hmy-contract's `function onLockedEvent(A, B, C)`
+> 
 > hmy-contract's event also trigger eth-contract's `onXxEvent`
 
 # Init a Bridge
