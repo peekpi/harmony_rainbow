@@ -49,7 +49,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
     }
 
     function CreateRainbow(ERC20Detailed thisSideToken) public returns(address) {
-        require(ThisSideLocked[address(thisSideToken)] == address(0));
+        require(ThisSideLocked[address(thisSideToken)] == address(0), "rainbow is exists");
         ERC20Detailed tokenDetail = ERC20Detailed(thisSideToken);
         emit TokenMapReq(address(thisSideToken), tokenDetail.decimals(), tokenDetail.name(), tokenDetail.symbol());
     }
@@ -112,12 +112,12 @@ contract RainbowOnes is ProvethVerifier,Ownable {
                 continue;
             }
             if(topics[0] == TokenMapReqEventSig){
-                onTokenMapReq(topics, Data);
+                onTokenMapReqEvent(topics, Data);
                 events++;
                 continue;
             }
             if(topics[0] == TokenMapAckEventSig){
-                onTokenMapAck(topics, Data);
+                onTokenMapAckEvent(topics, Data);
                 events++;
                 continue;
             }
@@ -141,7 +141,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         BridgedToken(mintToken).mint(recipient, amount);
     }
 
-    function onTokenMapReq(bytes32[] memory topics, bytes memory Data) private {
+    function onTokenMapReqEvent(bytes32[] memory topics, bytes memory Data) private {
         // event TokenMapReq(address indexed tokenReq, uint256 decimals, string name, string symbol);
         address tokenReq = address(uint160(uint256(topics[1])));
         require(OtherSideLocked[tokenReq] == address(0), "bridge already exist");
@@ -153,7 +153,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         emit TokenMapAck(tokenReq, address(mintAddress));
     }
 
-    function onTokenMapAck(bytes32[] memory topics, bytes memory Data) private {
+    function onTokenMapAckEvent(bytes32[] memory topics, bytes memory Data) private {
         // event TokenMapAck(address indexed tokenReq, address indexed tokenAck);
         Data;
         address tokenReq = address(uint160(uint256(topics[1])));
