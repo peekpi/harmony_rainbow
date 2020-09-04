@@ -6,12 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import "@openzeppelin/contracts//ownership/Ownable.sol";
 
 contract BridgedToken is ERC20Burnable,ERC20Detailed,ERC20Mintable {
     constructor(string memory name, string memory symbol, uint8 decimals) ERC20Detailed(name,symbol,decimals) public{}
 }
 
-contract RainbowOnes is ProvethVerifier {
+contract RainbowOnes is ProvethVerifier,Ownable {
     using RLPReader for RLPReader.RLPItem;
 	using RLPReader for bytes;
 
@@ -35,15 +36,15 @@ contract RainbowOnes is ProvethVerifier {
 
     mapping(bytes32=>bool) public spentReceipt;
 
-    constructor() public {
+    constructor() Ownable() public {
         lightclient = new LightClient();
     }
 
-    function changeLightClient(LightClient newClient) public {
+    function changeLightClient(LightClient newClient) public onlyOwner {
         lightclient = newClient;
     }
 
-    function bandBridgeSide(address otherSide) public {
+    function bandBridgeSide(address otherSide) public onlyOwner {
         otherSideBridge = otherSide;
     }
 
