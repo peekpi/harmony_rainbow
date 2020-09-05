@@ -1,6 +1,6 @@
 {
-    "ercToken": "0xf3293BCba4a015DF909769088c971d72caCD4Bb4",
-    "ethLocker": "0x5e1D976Bd4CF97Bb593E6bc88bA50B54b664b09c",
-    "hrcToken": "0x6b197ed741cfbe139c067b571f418d8712a19eae",
-    "hrcMinter": "0xfdd0e3179d8ceadfd7d300014a75b6afb183388d"
+    "ercToken": "0x3cB113A9457BAE65A86EB1F43ba74043130Cabde",
+    "ethBridge": "0x47aB630b9C6F5993A3388ED59CC28127Ffbc98dc",
+    "hmyBridge": "0x2881b6e231d00d43cca3e5b4956b5f2e0a8723bb",
+    "hrcToken": "0xb3685bcf146fdb4871ab1fe0139212024f8e502f"
 }
