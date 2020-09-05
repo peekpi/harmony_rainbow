@@ -24,17 +24,16 @@ async function eth2Hmy() {
 
         console.log("locking token")
         let locked = await eb.lock(hb.userAccount.address, amount)
-        console.log("token locked", locked.transactionHash)
+        console.log("token locked", locked)
 
         let finalBal = await eb.getBalance(eb.userAccount.address)
         console.log("final erc20 balance: ", finalBal)
 
-        let proof = await eb.getProof(locked.transactionHash)
+        let proof = await eb.getProof(locked)
 
         console.log("====================== Mint on Harmony ==========================")
 
         let initialHmyBal = await hb.getBalance(hb.userAccount.address)
-        console.log(initialHmyBal)
         console.log("initial hrc20 balance: ", initialHmyBal.toString())
 
         console.log("minting on Harmony")
@@ -48,4 +47,43 @@ async function eth2Hmy() {
     }
 }
 
-eth2Hmy().catch( (err) => console.log ).finally(() => process.exit())
+// hmy2Eth must be called after eth2Hmy
+async function hmy2Eth() {
+    try {
+        console.log("====================== Lock in Harmony ==========================")
+        let initialBal = await hb.getBalance(hb.userAccount.address)
+        console.log("initial erc20 balance: ", initialBal.toString())
+
+        console.log("approving token")
+        let amount = new BN(10).pow(new BN(18))
+        await hb.approve(contracts.hmyBridge, amount)
+
+        console.log("locking token")
+        let txHash = await hb.lock(eb.userAccount.address, amount)
+        console.log("token locked", txHash)
+
+        let finalBal = await hb.getBalance(eb.userAccount.address)
+        console.log("final erc20 balance: ", finalBal.toString())
+
+        let proof = await hb.getProof(txHash)
+
+        console.log("====================== Unlock on Harmony ==========================")
+
+        let initialHmyBal = await eb.getBalance(eb.userAccount.address)
+        console.log("initial erc20 balance: ", initialHmyBal)
+
+        console.log("minting on Ethereum")
+        txHash = await eb.handleHmyProof(proof)
+        console.log(txHash)
+
+        let finalHmyBal = await eb.getBalance(eb.userAccount.address)
+        console.log("after erc20 balance: ", finalHmyBal)
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+// eth2Hmy().catch( (err) => console.log ).finally(() => process.exit())
+eth2Hmy().then( () => {
+    return hmy2Eth()
+}).catch( (err) => console.error ).finally(() => process.exit())
