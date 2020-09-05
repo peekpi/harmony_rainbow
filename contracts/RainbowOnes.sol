@@ -16,7 +16,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
     using RLPReader for RLPReader.RLPItem;
 	using RLPReader for bytes;
 
-    event TokenMapReq(address indexed tokenReq, uint8 decimals, string name, string symbol);
+    event TokenMapReq(address indexed tokenReq, uint8 indexed decimals, string name, string symbol);
     bytes32 TokenMapReqEventSig = keccak256("TokenMapReq(address,uint8,string,string)");
     event TokenMapAck(address indexed tokenReq, address indexed tokenAck);
     bytes32 TokenMapAckEventSig = keccak256("TokenMapAck(address,address)");
@@ -60,7 +60,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
             "Locker/recipient is a zero address"
         );
         require(ThisSideMint[address(token)] != address(0), "bridge isn't exist");
-        token.burnFrom(address(token), amount);
+        token.burnFrom(msg.sender, amount);
         emit Burn(address(token), msg.sender, amount, recipient);
     }
 
@@ -88,7 +88,8 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         RLPReader.RLPItem memory stacks = rlpdata.toRlpItem();
         RLPReader.RLPItem[] memory receipt = stacks.toList();
         // TODO: check txs is revert or not
-        //bytes memory PostStateOrStatus = receipt[0].toBytes();
+        uint PostStateOrStatus = receipt[0].toUint();
+        require(PostStateOrStatus == 1, "revert receipt");
         //uint CumulativeGasUsed = receipt[1].toUint();
         //bytes memory Bloom = receipt[2].toBytes();
         RLPReader.RLPItem[] memory Logs = receipt[3].toList();
