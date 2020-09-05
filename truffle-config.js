@@ -40,6 +40,21 @@ module.exports = {
         return truffleProvider;
       },
     },
+    local: {
+      //provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
+      port: 8545,
+      host: "127.0.0.1",
+      network_id: "*"
+   },
+   // for truffle develop
+   develop: {
+     host:"127.0.0.1",
+     port: 8545,
+     network_id: 20,
+     accounts: 5,
+     defaultEtherBalance: 500,
+     blockTime: 0
+   }
   },
 
   // Set default mocha options here, use special reporters etc.
