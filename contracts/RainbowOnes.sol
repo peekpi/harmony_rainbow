@@ -74,8 +74,8 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         emit Locked(address(token), msg.sender, amount, recipient);
     }
 
-    function ExecProof(uint256 blockNo, bytes32 rootHash, bytes memory mptkey, bytes memory proof) public {
-        require(lightclient.VerifyReceiptsHash(blockNo, rootHash), "wrong receipt hash");
+    function ExecProof(bytes32 blockHash, bytes32 rootHash, bytes memory mptkey, bytes memory proof) public {
+        require(lightclient.VerifyReceiptsHash(blockHash, rootHash), "wrong receipt hash");
         bytes memory rlpdata = MPTProof(rootHash, mptkey, proof); // double spending check
         bytes32 receiptHash = keccak256(rlpdata);
         require(spentReceipt[receiptHash] == false, "double spent!");
@@ -87,6 +87,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
 	function receiptVerify(bytes memory rlpdata) private returns(uint256 events) {
         RLPReader.RLPItem memory stacks = rlpdata.toRlpItem();
         RLPReader.RLPItem[] memory receipt = stacks.toList();
+        // TODO: check txs is revert or not
         //bytes memory PostStateOrStatus = receipt[0].toBytes();
         //uint CumulativeGasUsed = receipt[1].toUint();
         //bytes memory Bloom = receipt[2].toBytes();
