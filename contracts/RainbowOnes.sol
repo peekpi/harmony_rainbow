@@ -26,7 +26,10 @@ contract RainbowOnes is ProvethVerifier,Ownable {
     bytes32 burnEventSig = keccak256("Burn(address,address,uint256,address)");
 
     address public otherSideBridge;
-    LightClient public lightclient;
+    ILightClient public lightclient;
+
+    address[] public LockedTokenList; // thisSide locked ERC20 list
+    address[] public MintTokenList; // thisSide mint ERC20 list
 
     mapping(address=>address) public ThisSideLocked;   // thisSide locked => otherSide mint
     mapping(address=>address) public OtherSideMint;    // otherSide mint => thisSide locked
@@ -37,10 +40,14 @@ contract RainbowOnes is ProvethVerifier,Ownable {
     mapping(bytes32=>bool) public spentReceipt;
 
     constructor() Ownable() public {
-        lightclient = new LightClient();
+        lightclient = new LightClientUnsafe();
     }
 
-    function changeLightClient(LightClient newClient) public onlyOwner {
+    function getRainbowSize() view public returns(uint256, uint256) {
+        return (LockedTokenList.length, MintTokenList.length);
+    }
+
+    function changeLightClient(ILightClient newClient) public onlyOwner {
         lightclient = newClient;
     }
 
@@ -76,9 +83,9 @@ contract RainbowOnes is ProvethVerifier,Ownable {
 
     function ExecProof(bytes32 blockHash, bytes32 rootHash, bytes memory mptkey, bytes memory proof) public {
         require(lightclient.VerifyReceiptsHash(blockHash, rootHash), "wrong receipt hash");
-        bytes memory rlpdata = MPTProof(rootHash, mptkey, proof); // double spending check
-        bytes32 receiptHash = keccak256(rlpdata);
+        bytes32 receiptHash = keccak256(abi.encodePacked(rootHash, mptkey));
         require(spentReceipt[receiptHash] == false, "double spent!");
+        bytes memory rlpdata = MPTProof(rootHash, mptkey, proof); // double spending check
         spentReceipt[receiptHash] = true;
         uint256 events = receiptVerify(rlpdata);
         require(events > 0, "no valid event");
@@ -152,6 +159,7 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         BridgedToken mintAddress = new BridgedToken(name, symbol, decimals);
         ThisSideMint[address(mintAddress)] = tokenReq;
         OtherSideLocked[tokenReq] = address(mintAddress);
+        MintTokenList.push(address(mintAddress));
         emit TokenMapAck(tokenReq, address(mintAddress));
     }
 
@@ -160,7 +168,9 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         Data;
         address tokenReq = address(uint160(uint256(topics[1])));
         address tokenAck = address(uint160(uint256(topics[2])));
+        require(ThisSideLocked[tokenReq] == address(0), "impossible ack"); // just check, shouldn't happen
         ThisSideLocked[tokenReq] = tokenAck;
         OtherSideMint[tokenAck] = tokenReq;
+        LockedTokenList.push(tokenReq);
     }
 }

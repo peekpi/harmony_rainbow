@@ -40,14 +40,14 @@ module.exports = {
         return truffleProvider;
       },
     },
-    local: {
+    eth: {
       //provider: () => new HDWalletProvider(mnemonic, `https://network.io`),
-      port: 8545,
+      port: 9545,
       host: "127.0.0.1",
       network_id: "*"
    },
    // for truffle develop
-   develop: {
+   hmy: {
      host:"127.0.0.1",
      port: 8545,
      network_id: 20,
