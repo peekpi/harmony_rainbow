@@ -16,6 +16,8 @@
     "bignumber.js": "^9.0.0",
     "bn.js": "^5.1.3",
     "dotenv": "^8.2.0",
+    "eth-proof": "^2.1.4",
+    "eth-util-lite": "^1.0.1",
     "tslib": "^2.0.1",
     "web3": "1.2.11"
   },
