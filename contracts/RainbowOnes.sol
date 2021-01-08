@@ -1,15 +1,17 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.6.2;
 
 import "./LightClient.sol";
 import "./MPTSolidity/ProvethVerifier.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
-import "@openzeppelin/contracts//ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "openzeppelin-solidity/contracts/presets/ERC20PresetMinterPauser.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
-contract BridgedToken is ERC20Burnable,ERC20Detailed,ERC20Mintable {
-    constructor(string memory name, string memory symbol, uint8 decimals) ERC20Detailed(name,symbol,decimals) public{}
+
+contract BridgedToken is ERC20PresetMinterPauser {
+    constructor(string memory name, string memory symbol, uint8 decimals) ERC20PresetMinterPauser(name,symbol) public{
+        _setupDecimals(decimals);
+    }
 }
 
 contract RainbowOnes is ProvethVerifier,Ownable {
@@ -55,9 +57,9 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         otherSideBridge = otherSide;
     }
 
-    function CreateRainbow(ERC20Detailed thisSideToken) public returns(address) {
+    function CreateRainbow(ERC20 thisSideToken) public returns(address) {
         require(ThisSideLocked[address(thisSideToken)] == address(0), "rainbow is exists");
-        ERC20Detailed tokenDetail = ERC20Detailed(thisSideToken);
+        ERC20 tokenDetail = thisSideToken;
         emit TokenMapReq(address(thisSideToken), tokenDetail.decimals(), tokenDetail.name(), tokenDetail.symbol());
     }
 
@@ -156,7 +158,8 @@ contract RainbowOnes is ProvethVerifier,Ownable {
         require(OtherSideLocked[tokenReq] == address(0), "bridge already exist");
         uint8 decimals = uint8(uint256(topics[2]));
         (string memory name, string memory symbol) = abi.decode(Data, (string, string));
-        BridgedToken mintAddress = new BridgedToken(name, symbol, decimals);
+        bytes32 salt = bytes32(uint256(uint160(tokenReq)));
+        BridgedToken mintAddress = new BridgedToken{salt: salt}(name, symbol, decimals);
         ThisSideMint[address(mintAddress)] = tokenReq;
         OtherSideLocked[tokenReq] = address(mintAddress);
         MintTokenList.push(address(mintAddress));
